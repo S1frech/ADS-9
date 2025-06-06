@@ -1,7 +1,7 @@
 // Copyright 2022 NNTU-CS
 #ifndef INCLUDE_TREE_H_
 #define INCLUDE_TREE_H_
-#pragma once
+
 #include <vector>
 
 class Node {
@@ -10,25 +10,29 @@ class Node {
   std::vector<Node*> children;
 
   explicit Node(char val);
-  ~Node();
+  ~Node();  // освобождение памяти
 };
 
 class PMTree {
  private:
   Node* root;
-
-  void buildTree(Node* current, std::vector<char> remaining);
-  void getAllPermsHelper(Node* node, std::vector<char>& path,
-                         std::vector<std::vector<char>>& result);
+  void build(Node* current, std::vector<char> remaining);
+  void collectPerms(Node* node, std::vector<char>& path,
+                    std::vector<std::vector<char>>& result);
 
  public:
-  explicit PMTree(std::vector<char> symbols);
+  explicit PMTree(const std::vector<char>& input);
   ~PMTree();
 
-  friend std::vector<std::vector<char>> getAllPerms(PMTree& tree);
+  std::vector<std::vector<char>> getAllPerms();
+
   friend std::vector<char> getPerm1(PMTree& tree, int num);
   friend std::vector<char> getPerm2(PMTree& tree, int num);
 };
 
+std::vector<std::vector<char>> getAllPerms(PMTree& tree);
+std::vector<char> getPerm1(PMTree& tree, int num);
+std::vector<char> getPerm2(PMTree& tree, int num);
 
 #endif  // INCLUDE_TREE_H_
+
