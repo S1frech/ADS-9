@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <locale>
-
+#include <vector>
 #include "tree.h"
 
 Node::Node(char val) : value(val) {}
