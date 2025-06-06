@@ -1,7 +1,7 @@
 // Copyright 2022 NNTU-CS
-#include <algorithm>
+#include <algorithm>  // sort, remove
+#include <iostream>   // для отладки, можно убрать
 #include <vector>
-
 #include "tree.h"
 
 Node::Node(char val) : value(val) {}
@@ -19,13 +19,18 @@ PMTree::~PMTree() { delete root; }
 void PMTree::build(Node* current, std::vector<char> remaining) {
   if (remaining.empty()) return;
 
-  std::sort(remaining.begin(), remaining.end());  // по возрастанию
+  std::sort(remaining.begin(),
+            remaining.end());  // сортируем, чтобы перестановки шли в
+                               // лексикографическом порядке
 
   for (char c : remaining) {
     Node* child = new Node(c);
     current->children.push_back(child);
 
+    // Создаем вектор без текущего символа
     std::vector<char> next = remaining;
+    // удаляем *все* вхождения c, но в нашем случае по условию уникальность, так
+    // что один символ
     next.erase(std::remove(next.begin(), next.end(), c), next.end());
 
     build(child, next);
@@ -35,11 +40,16 @@ void PMTree::build(Node* current, std::vector<char> remaining) {
 void PMTree::collectPerms(Node* node, std::vector<char>& path,
                           std::vector<std::vector<char>>& result) {
   if (node->value != '\0') path.push_back(node->value);
+
   if (node->children.empty()) {
+    // лист - полная перестановка
     result.push_back(path);
   } else {
-    for (Node* child : node->children) collectPerms(child, path, result);
+    for (Node* child : node->children) {
+      collectPerms(child, path, result);
+    }
   }
+
   if (!path.empty()) path.pop_back();
 }
 
@@ -64,18 +74,25 @@ std::vector<char> getPerm2(PMTree& tree, int num) {
   std::vector<char> result;
   Node* current = tree.root;
 
-  std::vector<int> factorials;
   int n = current->children.size();
-  int fact = 1;
+  if (n == 0) return {};  // нет перестановок
+
+  // Вычисляем факториалы 0! .. n!
+  std::vector<int> factorials(n + 1, 1);
   for (int i = 1; i <= n; ++i) {
-    fact *= i;
-    factorials.push_back(fact);
+    factorials[i] = factorials[i - 1] * i;
   }
 
-  --num;
+  // Проверяем, что num не выходит за пределы числа перестановок
+  if (num <= 0 || num > factorials[n]) return {};
+
+  --num;  // индексируем с 0
+
   std::vector<Node*> level = current->children;
-  while (!level.empty()) {
-    int f = factorials[--n];
+  int level_size = n;
+
+  while (level_size > 0) {
+    int f = factorials[level_size - 1];
     int index = num / f;
     num %= f;
 
@@ -83,8 +100,13 @@ std::vector<char> getPerm2(PMTree& tree, int num) {
 
     Node* chosen = level[index];
     result.push_back(chosen->value);
+
+    // Удаляем выбранного ребенка
     level.erase(level.begin() + index);
+
+    // Переходим на следующий уровень к детям выбранного узла
     level = chosen->children;
+    --level_size;
   }
 
   return result;
