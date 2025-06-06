@@ -9,7 +9,7 @@ class Node {
   char value;
   std::vector<Node*> children;
 
-  Node(char val);
+  explicit Node(char val);
   ~Node();
 };
 
@@ -22,7 +22,7 @@ class PMTree {
                          std::vector<std::vector<char>>& result);
 
  public:
-  PMTree(std::vector<char> symbols);
+  explicit PMTree(std::vector<char> symbols);
   ~PMTree();
 
   friend std::vector<std::vector<char>> getAllPerms(PMTree& tree);
